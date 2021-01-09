@@ -75,26 +75,29 @@ while True:
 
     jtext = xmltodict.parse(xmlbuffer)
 
-    # Convert the string values stored to float and transform them
-    currentWatts = float(jtext['electricity']['property']['current']['watts'])
-    costToday = float(jtext['electricity']['property']['day']['cost']) / 100.0
-    kwhToday = float(jtext['electricity']['property']['day']['wh']) / 1000.0
+    try:
+        # Convert the string values stored to float and transform them
+        currentWatts = float(jtext['electricity']['property']['current']['watts'])
+        costToday = float(jtext['electricity']['property']['day']['cost']) / 100.0
+        kwhToday = float(jtext['electricity']['property']['day']['wh']) / 1000.0
 
-    # Modify the JSON accordingly
-    jtext['electricity']['property'] = {'current_W': currentWatts, 'costTodayCHF': costToday, 'kwhToday': kwhToday}
+        # Modify the JSON accordingly
+        jtext['electricity']['property'] = {'current_W': currentWatts, 'costTodayCHF': costToday, 'kwhToday': kwhToday}
 
-    pretty = json.dumps(jtext, sort_keys = True, indent=4)
+        pretty = json.dumps(jtext, sort_keys = True, indent=4)
 
-    #if DEBUG:
-    #    print(pretty)
+        #if DEBUG:
+        #    print(pretty)
 
-    print("")
-    t = time.localtime()
-    current_time = time.strftime("%d.%m.%y at %H:%M:%S", t)
-    print('Pushing data - ' + current_time)
-    print('\tCurrent now [W]: ' + str(currentWatts))
-    print('\tCost today in CHF: ' + str(costToday))
-    print('\tkWh today [kWh]: ' + str(kwhToday))
+        print("")
+        t = time.localtime()
+        current_time = time.strftime("%d.%m.%y at %H:%M:%S", t)
+        print('Pushing data - ' + current_time)
+        print('\tCurrent now [W]: ' + str(currentWatts))
+        print('\tCost today in CHF: ' + str(costToday))
+        print('\tkWh today [kWh]: ' + str(kwhToday))
 
-    pushData(jtext['electricity']['property'], "heat_pump", client)
+        pushData(jtext['electricity']['property'], "heat_pump", client)
+    except KeyError:
+        
     pass

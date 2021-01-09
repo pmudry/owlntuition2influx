@@ -79,10 +79,10 @@ while True:
         # Convert the string values stored to float and transform them
         currentWatts = float(jtext['electricity']['property']['current']['watts'])
         costToday = float(jtext['electricity']['property']['day']['cost']) / 100.0
-        kwhToday = float(jtext['electricity']['property']['day']['wh']) / 1000.0
+        whToday = float(jtext['electricity']['property']['day']['wh']) 
 
         # Modify the JSON accordingly
-        jtext['electricity']['property'] = {'current_W': currentWatts, 'costTodayCHF': costToday, 'kwhToday': kwhToday}
+        jtext['electricity']['property'] = {'current_W': currentWatts, 'costTodayCHF': costToday, 'whToday': kwhToday}
 
         pretty = json.dumps(jtext, sort_keys = True, indent=4)
 
@@ -95,9 +95,10 @@ while True:
         print('Pushing data - ' + current_time)
         print('\tCurrent now [W]: ' + str(currentWatts))
         print('\tCost today in CHF: ' + str(costToday))
-        print('\tkWh today [kWh]: ' + str(kwhToday))
+        print('\tWatt/hours today [Wh]: ' + str(whToday))
 
         pushData(jtext['electricity']['property'], "heat_pump", client)
     except KeyError:
+        print('Parsing error, not pushing this time')
         
     pass

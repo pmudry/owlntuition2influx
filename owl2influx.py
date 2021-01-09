@@ -82,7 +82,7 @@ while True:
         whToday = float(jtext['electricity']['property']['day']['wh']) 
 
         # Modify the JSON accordingly
-        jtext['electricity']['property'] = {'current_W': currentWatts, 'costTodayCHF': costToday, 'whToday': kwhToday}
+        jtext['electricity']['property'] = {'current_W': currentWatts, 'costTodayCHF': costToday, 'whToday': whToday}
 
         pretty = json.dumps(jtext, sort_keys = True, indent=4)
 

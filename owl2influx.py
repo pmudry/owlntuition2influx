@@ -5,7 +5,7 @@ import time
 import datetime
 import os.path
 import sys
-import threading
+import _thread
 import argparse
 from influxdb import InfluxDBClient
 
@@ -53,7 +53,7 @@ def progress(threadName, delay):
                 bar.next()
 try:
     if DEBUG:
-        threading.Thread(target=progress, args=("Progress thread", 0.2)).start
+        _thread.start_new_thread(progress, ("Progress thread", 0.2))
 
 
 except:

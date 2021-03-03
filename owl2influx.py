@@ -5,7 +5,7 @@ import time
 import datetime
 import os.path
 import sys
-import thread
+import threading
 import argparse
 from influxdb import InfluxDBClient
 
@@ -53,10 +53,11 @@ def progress(threadName, delay):
                 bar.next()
 try:
     if DEBUG:
-        thread.start_new_thread(progress, ("Progress thread", 0.2))
+        threading.Thread(target=progress, args=("Progress thread", 0.2)).start
+
 
 except:
-    print "Unable to start thread"
+    print("Unable to start thread")
 
 def pushData(data, seriesName, client):
         valQuery = [1]
@@ -76,25 +77,33 @@ while True:
     jtext = xmltodict.parse(xmlbuffer)
 
     try:
-        # Convert the string values stored to float and transform them
-        currentWatts = float(jtext['electricity']['property']['current']['watts'])
-        costToday = float(jtext['electricity']['property']['day']['cost']) / 100.0
-        whToday = float(jtext['electricity']['property']['day']['wh']) 
+        # Convert the string values stored to float and transform them. The total current reported
+        # in the property field is incorrect (only phase 1), hence the sum of individual phases
+        currentWatts_ph1 = float(jtext['electricity']['channels']['chan'][0]['curr']['#text'])
+        currentWatts_ph2 = float(jtext['electricity']['channels']['chan'][1]['curr']['#text'])
+        currentWatts_ph3 = float(jtext['electricity']['channels']['chan'][2]['curr']['#text'])
+        currentWatts = currentWatts_ph1 + currentWatts_ph2 + currentWatts_ph3;
+
+        wh_ph1 = float(jtext['electricity']['channels']['chan'][0]['day']['#text'])
+        wh_ph2 = float(jtext['electricity']['channels']['chan'][1]['day']['#text'])
+        wh_ph3 = float(jtext['electricity']['channels']['chan'][2]['day']['#text'])
+
+        #costToday = float(jtext['electricity']['property']['day']['cost']) / 100.0
+        whToday = wh_ph1 + wh_ph2 + wh_ph3 
 
         # Modify the JSON accordingly
-        jtext['electricity']['property'] = {'current_W': currentWatts, 'costTodayCHF': costToday, 'whToday': whToday}
+        jtext['electricity']['property'] = {'current_W': currentWatts, 'whToday': whToday}
 
         pretty = json.dumps(jtext, sort_keys = True, indent=4)
 
-        #if DEBUG:
-        #    print(pretty)
+        if DEBUG:
+            print(pretty)
 
         print("")
         t = time.localtime()
         current_time = time.strftime("%d.%m.%y at %H:%M:%S", t)
         print('Pushing data - ' + current_time)
         print('\tCurrent now [W]: ' + str(currentWatts))
-        print('\tCost today in CHF: ' + str(costToday))
         print('\tWatt/hours today [Wh]: ' + str(whToday))
 
         pushData(jtext['electricity']['property'], "heat_pump", client)

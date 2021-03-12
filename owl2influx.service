@@ -1,0 +1,10 @@
+[Unit]
+Description=OWL 2 Influx forwarder and parser
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python /home/pyrrhus/owlntuition2influx/owl2influx.py --nodebug
+
+[Install]
+WantedBy=multi-user.target
